@@ -25,6 +25,389 @@
 
 ## Question 1. Detect and remove loop in a linked list
 
+# Detect and Remove Loop in a Linked List
+
+## Concise Answer
+
+The most efficient way to detect and remove a loop in a linked list is to use **Floyd's Cycle Detection Algorithm (Tortoise and Hare)**.
+
+1. Detect if a cycle exists using slow and fast pointers.
+2. Find the starting node of the loop.
+3. Find the last node in the loop and set its `next` pointer to `null`.
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(1)
+
+---
+
+# 1. Problem Understanding
+
+Given a singly linked list, determine whether it contains a cycle (loop).
+
+Example:
+
+```text
+1 → 2 → 3 → 4 → 5
+          ↑     ↓
+          ← ← ←
+```
+
+The node `5` points back to `3`, creating a loop.
+
+After removal:
+
+```text
+1 → 2 → 3 → 4 → 5 → null
+```
+
+---
+
+# 2. Approach 1: Floyd's Cycle Detection (Optimal)
+
+## Step 1: Detect the Loop
+
+Use two pointers:
+
+- `slow` moves one step.
+- `fast` moves two steps.
+
+If they ever meet, a cycle exists.
+
+```text
+slow: 1 → 2 → 3 → 4
+fast: 1 → 3 → 5 → 4
+
+Meet at node 4
+```
+
+---
+
+## Step 2: Find the Starting Node of the Loop
+
+Once a meeting point is found:
+
+- Move one pointer to `head`.
+- Keep the other at the meeting point.
+- Move both one step at a time.
+
+The node where they meet again is the **start of the loop**.
+
+### Why does this work?
+
+Suppose:
+
+```text
+Distance from head to loop start = x
+Loop length = y
+```
+
+When slow and fast meet:
+
+```text
+2 × distance(slow) = distance(fast)
+```
+
+This mathematical relationship guarantees that resetting one pointer to the head and moving both one step at a time leads them to the loop's starting node.
+
+---
+
+## Step 3: Remove the Loop
+
+Once the loop start is known:
+
+- Traverse the loop until reaching the node whose `next` points back to the loop start.
+- Set its `next` to `null`.
+
+---
+
+# JavaScript Solution (Optimal)
+
+```javascript
+class ListNode {
+  constructor(val) {
+    this.val = val;
+    this.next = null;
+  }
+}
+
+const detectAndRemoveLoop = (head) => {
+  if (!head || !head.next) return head;
+
+  let slow = head;
+  let fast = head;
+  let hasLoop = false;
+
+  // Detect loop
+  while (fast && fast.next) {
+    slow = slow.next;
+    fast = fast.next.next;
+
+    if (slow === fast) {
+      hasLoop = true;
+      break;
+    }
+  }
+
+  if (!hasLoop) return head;
+
+  // Find start of loop
+  slow = head;
+
+  while (slow !== fast) {
+    slow = slow.next;
+    fast = fast.next;
+  }
+
+  const loopStart = slow;
+
+  // Find last node of loop
+  let ptr = loopStart;
+
+  while (ptr.next !== loopStart) {
+    ptr = ptr.next;
+  }
+
+  // Remove loop
+  ptr.next = null;
+
+  return head;
+};
+```
+
+---
+
+# 3. Approach 2: Using HashSet
+
+## Idea
+
+Store visited nodes in a Set.
+
+For every node:
+
+- If already visited → loop detected.
+- Break the loop by setting previous node's `next = null`.
+
+---
+
+## JavaScript
+
+```javascript
+const detectAndRemoveLoop = (head) => {
+  const visited = new Set();
+
+  let curr = head;
+  let prev = null;
+
+  while (curr) {
+    if (visited.has(curr)) {
+      prev.next = null;
+      return head;
+    }
+
+    visited.add(curr);
+    prev = curr;
+    curr = curr.next;
+  }
+
+  return head;
+};
+```
+
+---
+
+## Complexity
+
+| Operation | Time | Space |
+| --------- | ---- | ----- |
+| Detection | O(n) | O(n)  |
+| Removal   | O(1) | O(n)  |
+
+---
+
+# Special Case: Loop Starts at Head
+
+Example:
+
+```text
+1 → 2 → 3 → 4
+↑         ↓
+← ← ← ← ←
+```
+
+After Floyd detection:
+
+```javascript
+slow = head;
+fast = meetingPoint;
+```
+
+Both pointers may already be at the loop start.
+
+The previous algorithm still works correctly.
+
+Example:
+
+```javascript
+1 -> 2 -> 3 -> 4
+^              |
+|______________|
+```
+
+The loop is removed by finding node `4` and setting:
+
+```javascript
+4.next = null;
+```
+
+---
+
+# Improved Floyd Solution (Handles All Cases)
+
+A common interview implementation:
+
+```javascript
+const detectAndRemoveLoop = (head) => {
+  let slow = head;
+  let fast = head;
+
+  while (fast && fast.next) {
+    slow = slow.next;
+    fast = fast.next.next;
+
+    if (slow === fast) {
+      break;
+    }
+  }
+
+  if (!fast || !fast.next) {
+    return head; // No loop
+  }
+
+  slow = head;
+
+  if (slow === fast) {
+    while (fast.next !== slow) {
+      fast = fast.next;
+    }
+  } else {
+    while (slow.next !== fast.next) {
+      slow = slow.next;
+      fast = fast.next;
+    }
+  }
+
+  fast.next = null;
+
+  return head;
+};
+```
+
+**Why this version is popular:**
+It finds the node immediately before the loop start and removes the loop without needing a separate traversal after locating the loop start.
+
+---
+
+# Complexity Analysis
+
+### Floyd's Algorithm
+
+| Operation   | Complexity |
+| ----------- | ---------- |
+| Detect loop | O(n)       |
+| Find start  | O(n)       |
+| Remove loop | O(n)       |
+| Total       | O(n)       |
+| Extra Space | O(1)       |
+
+---
+
+# Edge Cases
+
+### 1. Empty List
+
+```text
+null
+```
+
+Output:
+
+```text
+null
+```
+
+---
+
+### 2. Single Node Without Loop
+
+```text
+1 → null
+```
+
+No changes.
+
+---
+
+### 3. Single Node With Self Loop
+
+```text
+1
+↑↓
+```
+
+After removal:
+
+```text
+1 → null
+```
+
+---
+
+### 4. Loop Starts at Head
+
+```text
+1 → 2 → 3 → 4
+↑         ↓
+← ← ← ← ←
+```
+
+Must correctly break the link from `4`.
+
+---
+
+### 5. Loop in Middle
+
+```text
+1 → 2 → 3 → 4 → 5
+          ↑     ↓
+          ← ← ←
+```
+
+Remove:
+
+```text
+5.next = null
+```
+
+---
+
+# Common Interview Pitfalls
+
+1. Detecting the loop but not removing it.
+2. Forgetting the case where the loop starts at the head.
+3. Comparing node values instead of node references.
+4. Using extra space when an O(1) solution is expected.
+5. Losing the loop-start node while trying to remove the cycle.
+
+---
+
+# Interview Tip
+
+When asked **"Detect and remove loop in a linked list"**, start with:
+
+> "I'll use Floyd's Cycle Detection Algorithm to detect the loop in O(n) time and O(1) space. After detecting the cycle, I'll locate the start of the loop and disconnect the last node in the cycle by setting its next pointer to null."
+
+This demonstrates knowledge of both **cycle detection** and **cycle removal**, which interviewers typically expect.
+
 ## Question 2. Check if a linked list is a palindrome
 
 ## Question 3. Add two numbers represented as linked lists
