@@ -25,6 +25,322 @@
 
 ## Question 1. Find the majority element in an array
 
+# Find the Majority Element in an Array
+
+## Concise Answer
+
+A **majority element** is an element that appears **more than ⌊n/2⌋ times** in an array of size `n`.
+
+The most optimal solution is **Boyer-Moore Voting Algorithm**, which runs in:
+
+- **Time Complexity:** `O(n)`
+- **Space Complexity:** `O(1)`
+
+---
+
+# 1. Problem Understanding
+
+### Example
+
+```js
+Input: [2, 2, 1, 1, 1, 2, 2];
+Output: 2;
+```
+
+`2` appears 4 times out of 7, which is more than `7/2 = 3.5`.
+
+### Assumptions
+
+Interviewers may ask either:
+
+1. **Majority element is guaranteed to exist** (common version).
+2. **Majority element may not exist** (follow-up question).
+
+Always clarify this in an interview.
+
+---
+
+# 2. Approach 1: Brute Force
+
+For each element, count its occurrences.
+
+### Idea
+
+- Pick every element.
+- Count how many times it appears.
+- If count > n/2, return it.
+
+### JavaScript
+
+```js
+const majorityElement = (nums) => {
+  const n = nums.length;
+
+  for (let i = 0; i < n; i++) {
+    let count = 0;
+
+    for (let j = 0; j < n; j++) {
+      if (nums[i] === nums[j]) {
+        count++;
+      }
+    }
+
+    if (count > Math.floor(n / 2)) {
+      return nums[i];
+    }
+  }
+
+  return -1;
+};
+```
+
+### Complexity
+
+- Time: `O(n²)`
+- Space: `O(1)`
+
+---
+
+# 3. Approach 2: Hash Map Counting
+
+Store frequencies in a map.
+
+### Idea
+
+1. Traverse array.
+2. Count occurrences.
+3. Return element whose count exceeds `n/2`.
+
+### JavaScript
+
+```js
+const majorityElement = (nums) => {
+  const freq = new Map();
+  const limit = Math.floor(nums.length / 2);
+
+  for (const num of nums) {
+    freq.set(num, (freq.get(num) || 0) + 1);
+
+    if (freq.get(num) > limit) {
+      return num;
+    }
+  }
+
+  return -1;
+};
+```
+
+### Complexity
+
+- Time: `O(n)`
+- Space: `O(n)`
+
+### When to Use
+
+Good when:
+
+- Need frequency information.
+- Multiple queries on counts are required.
+
+---
+
+# 4. Approach 3: Boyer-Moore Voting Algorithm (Optimal)
+
+### Core Insight
+
+If the majority element appears more than half the time, it can never be completely canceled out by all other elements combined.
+
+Maintain:
+
+- `candidate`
+- `count`
+
+### Rules
+
+1. If count becomes `0`, choose current element as candidate.
+2. If current element equals candidate → increment count.
+3. Otherwise → decrement count.
+
+---
+
+### Dry Run
+
+```js
+[2, 2, 1, 1, 1, 2, 2];
+```
+
+| Element | Candidate | Count |
+| ------- | --------- | ----- |
+| 2       | 2         | 1     |
+| 2       | 2         | 2     |
+| 1       | 2         | 1     |
+| 1       | 2         | 0     |
+| 1       | 1         | 1     |
+| 2       | 1         | 0     |
+| 2       | 2         | 1     |
+
+Final candidate = `2`
+
+---
+
+### JavaScript
+
+```js
+const majorityElement = (nums) => {
+  let candidate = null;
+  let count = 0;
+
+  for (const num of nums) {
+    if (count === 0) {
+      candidate = num;
+    }
+
+    count += num === candidate ? 1 : -1;
+  }
+
+  return candidate;
+};
+```
+
+### Complexity
+
+- Time: `O(n)`
+- Space: `O(1)`
+
+This is the solution interviewers usually expect.
+
+---
+
+# 5. Follow-Up: What If Majority Element Is Not Guaranteed?
+
+Boyer-Moore only gives a **candidate**.
+
+We must verify it.
+
+### JavaScript
+
+```js
+const majorityElement = (nums) => {
+  let candidate = null;
+  let count = 0;
+
+  for (const num of nums) {
+    if (count === 0) {
+      candidate = num;
+    }
+
+    count += num === candidate ? 1 : -1;
+  }
+
+  count = 0;
+
+  for (const num of nums) {
+    if (num === candidate) {
+      count++;
+    }
+  }
+
+  return count > Math.floor(nums.length / 2) ? candidate : -1;
+};
+```
+
+### Complexity
+
+- Time: `O(n)`
+- Space: `O(1)`
+
+---
+
+# Edge Cases
+
+### Single Element
+
+```js
+[5];
+```
+
+Output:
+
+```js
+5;
+```
+
+---
+
+### All Same Elements
+
+```js
+[3, 3, 3, 3];
+```
+
+Output:
+
+```js
+3;
+```
+
+---
+
+### No Majority Element
+
+```js
+[1, 2, 3, 4];
+```
+
+Output:
+
+```js
+-1;
+```
+
+(when verification step is included)
+
+---
+
+### Negative Numbers
+
+```js
+[-1, -1, -1, 2, 3];
+```
+
+Output:
+
+```js
+-1;
+```
+
+---
+
+# Interview Tips
+
+### Why does Boyer-Moore work?
+
+Think of it as **pairwise cancellation**:
+
+```text
+Majority Element : A A A A A
+Others           : B C D E
+```
+
+Each non-majority element cancels one occurrence of the majority element.
+
+Since the majority element appears more than `n/2` times, it still survives after all cancellations.
+
+### What interviewers often ask next
+
+1. Find element occurring more than `n/3` times.
+   - Use extended Boyer-Moore.
+   - At most 2 such elements can exist.
+
+2. Find all elements occurring more than `n/k` times.
+   - Generalized voting algorithm.
+
+---
+
+## Recommended Interview Answer
+
+> "I would use the Boyer-Moore Voting Algorithm. It maintains a candidate and a counter, canceling out different elements as we traverse the array. Because a majority element appears more than half the time, it survives all cancellations. This gives an O(n) time and O(1) space solution, which is optimal."
+
 ## Question 2. Move all zeros to the end of an array
 
 ## Question 3. Merge two sorted arrays without extra space
