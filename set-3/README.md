@@ -25,6 +25,297 @@
 
 ## Question 1. Count the number of nodes in a binary tree
 
+# Count the Number of Nodes in a Binary Tree
+
+## Direct Answer
+
+To count the number of nodes in a binary tree, traverse every node once and keep a count.
+
+The recursive formula is:
+
+[
+\text{count(root)} = 1 + \text{count(root.left)} + \text{count(root.right)}
+]
+
+If the node is `null`, return `0`.
+
+---
+
+# 1. Problem Understanding
+
+Given the root of a binary tree, return the total number of nodes present in the tree.
+
+### Example
+
+```text
+        1
+       / \
+      2   3
+     / \
+    4   5
+```
+
+Total nodes = **5**
+
+---
+
+# 2. Approach 1: Recursive DFS (Most Common Interview Solution)
+
+### Idea
+
+Every node contributes:
+
+- 1 for itself
+- count of nodes in left subtree
+- count of nodes in right subtree
+
+### Algorithm
+
+1. If root is `null`, return 0.
+2. Recursively count nodes in left subtree.
+3. Recursively count nodes in right subtree.
+4. Return `1 + leftCount + rightCount`.
+
+### JavaScript Code
+
+```javascript
+const countNodes = (root) => {
+  if (!root) return 0;
+
+  return 1 + countNodes(root.left) + countNodes(root.right);
+};
+```
+
+### Complexity Analysis
+
+- **Time:** O(n)
+  - Every node is visited once.
+
+- **Space:** O(h)
+  - Recursive call stack.
+  - `h` = height of tree.
+
+Worst case (skewed tree):
+
+```text
+O(n)
+```
+
+Balanced tree:
+
+```text
+O(log n)
+```
+
+---
+
+# 3. Approach 2: Iterative DFS Using Stack
+
+### Idea
+
+Avoid recursion by using an explicit stack.
+
+### Algorithm
+
+1. Push root into stack.
+2. While stack is not empty:
+   - Pop a node.
+   - Increment count.
+   - Push left child.
+   - Push right child.
+
+3. Return count.
+
+### JavaScript Code
+
+```javascript
+const countNodes = (root) => {
+  if (!root) return 0;
+
+  let count = 0;
+  const stack = [root];
+
+  while (stack.length) {
+    const node = stack.pop();
+    count++;
+
+    if (node.left) stack.push(node.left);
+    if (node.right) stack.push(node.right);
+  }
+
+  return count;
+};
+```
+
+### Complexity
+
+- **Time:** O(n)
+- **Space:** O(h) average, O(n) worst case
+
+---
+
+# 4. Approach 3: Iterative BFS (Level Order Traversal)
+
+### Idea
+
+Traverse level by level and count nodes.
+
+### JavaScript Code
+
+```javascript
+const countNodes = (root) => {
+  if (!root) return 0;
+
+  let count = 0;
+  const queue = [root];
+
+  while (queue.length) {
+    const node = queue.shift();
+    count++;
+
+    if (node.left) queue.push(node.left);
+    if (node.right) queue.push(node.right);
+  }
+
+  return count;
+};
+```
+
+### Complexity
+
+- **Time:** O(n)
+- **Space:** O(w)
+
+Where `w` is the maximum width of the tree.
+
+---
+
+# 5. Optimized Approach for Complete Binary Trees
+
+Interviewers sometimes specifically ask:
+
+> "Count nodes in a Complete Binary Tree."
+
+A complete binary tree allows a faster solution than O(n).
+
+### Idea
+
+For a subtree:
+
+- Compute left height.
+- Compute right height.
+- If both heights are equal:
+  - Tree is perfect.
+  - Number of nodes:
+
+2^h-1
+
+- Otherwise recursively count left and right subtrees.
+
+### JavaScript Code
+
+```javascript
+const leftHeight = (node) => {
+  let height = 0;
+
+  while (node) {
+    height++;
+    node = node.left;
+  }
+
+  return height;
+};
+
+const rightHeight = (node) => {
+  let height = 0;
+
+  while (node) {
+    height++;
+    node = node.right;
+  }
+
+  return height;
+};
+
+const countNodes = (root) => {
+  if (!root) return 0;
+
+  const lh = leftHeight(root);
+  const rh = rightHeight(root);
+
+  if (lh === rh) {
+    return Math.pow(2, lh) - 1;
+  }
+
+  return 1 + countNodes(root.left) + countNodes(root.right);
+};
+```
+
+### Complexity
+
+- **Time:** O(log² n)
+- **Space:** O(log n)
+
+This is the expected optimized solution for the classic complete binary tree problem.
+
+---
+
+# 6. Edge Cases
+
+### Empty Tree
+
+```text
+root = null
+```
+
+Output:
+
+```text
+0
+```
+
+### Single Node
+
+```text
+  1
+```
+
+Output:
+
+```text
+1
+```
+
+### Skewed Tree
+
+```text
+1
+ \
+  2
+   \
+    3
+```
+
+Output:
+
+```text
+3
+```
+
+---
+
+# 7. Interview Tips
+
+- For a **general binary tree**, the standard answer is recursive DFS with **O(n)** time.
+- Mention iterative DFS/BFS if asked to avoid recursion.
+- If the interviewer says **"complete binary tree"**, discuss the **O(log² n)** optimization.
+- Always clarify whether the tree is:
+  - General Binary Tree
+  - Complete Binary Tree
+  - Perfect Binary Tree
+
+This distinction often determines whether the interviewer expects the optimized solution.
+
 ## Question 2. Find the diameter of a binary tree
 
 ## Question 3. Check if a tree is balanced
