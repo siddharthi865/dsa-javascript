@@ -25,6 +25,326 @@
 
 ## Question 1. Print the boundary of a binary tree
 
+# Print the Boundary of a Binary Tree
+
+## Concise Answer
+
+The **boundary traversal** of a binary tree prints nodes in this order:
+
+1. Root node
+2. Left boundary (excluding leaf nodes)
+3. All leaf nodes (left to right)
+4. Right boundary (excluding leaf nodes, printed in reverse order)
+
+A common interview solution uses **three separate traversals** for left boundary, leaves, and right boundary.
+
+---
+
+# 1. Problem Understanding
+
+Given a binary tree, print all nodes lying on its boundary in an anti-clockwise direction.
+
+### Example
+
+```
+        20
+       /  \
+      8    22
+     / \     \
+    4  12     25
+      /  \
+     10  14
+```
+
+Boundary Traversal:
+
+```
+20 8 4 10 14 25 22
+```
+
+Explanation:
+
+- Root → 20
+- Left boundary → 8
+- Leaves → 4, 10, 14, 25
+- Right boundary (bottom-up) → 22
+
+---
+
+# 2. Approach
+
+The boundary consists of three parts:
+
+### A. Left Boundary
+
+Traverse from root's left child:
+
+- Prefer left child
+- Otherwise go right
+- Exclude leaf nodes
+
+### B. Leaf Nodes
+
+Perform DFS and collect all leaf nodes from left to right.
+
+### C. Right Boundary
+
+Traverse from root's right child:
+
+- Prefer right child
+- Otherwise go left
+- Exclude leaf nodes
+- Store nodes and add them in reverse order
+
+---
+
+# 3. Algorithm
+
+1. Add root.
+2. Traverse left boundary.
+3. Traverse all leaves.
+4. Traverse right boundary and reverse it.
+5. Return the result.
+
+---
+
+# 4. JavaScript Solution
+
+```javascript
+class TreeNode {
+  constructor(val) {
+    this.val = val;
+    this.left = null;
+    this.right = null;
+  }
+}
+
+const boundaryTraversal = (root) => {
+  if (!root) return [];
+
+  const result = [];
+
+  const isLeaf = (node) => node && !node.left && !node.right;
+
+  // Add root
+  if (!isLeaf(root)) {
+    result.push(root.val);
+  }
+
+  // Left Boundary
+  let curr = root.left;
+
+  while (curr) {
+    if (!isLeaf(curr)) {
+      result.push(curr.val);
+    }
+
+    curr = curr.left ? curr.left : curr.right;
+  }
+
+  // Leaf Nodes
+  const addLeaves = (node) => {
+    if (!node) return;
+
+    if (isLeaf(node)) {
+      result.push(node.val);
+      return;
+    }
+
+    addLeaves(node.left);
+    addLeaves(node.right);
+  };
+
+  addLeaves(root);
+
+  // Right Boundary
+  curr = root.right;
+  const rightBoundary = [];
+
+  while (curr) {
+    if (!isLeaf(curr)) {
+      rightBoundary.push(curr.val);
+    }
+
+    curr = curr.right ? curr.right : curr.left;
+  }
+
+  for (let i = rightBoundary.length - 1; i >= 0; i--) {
+    result.push(rightBoundary[i]);
+  }
+
+  return result;
+};
+```
+
+---
+
+# Example Walkthrough
+
+```javascript
+const root = new TreeNode(20);
+
+root.left = new TreeNode(8);
+root.right = new TreeNode(22);
+
+root.left.left = new TreeNode(4);
+root.left.right = new TreeNode(12);
+
+root.left.right.left = new TreeNode(10);
+root.left.right.right = new TreeNode(14);
+
+root.right.right = new TreeNode(25);
+
+console.log(boundaryTraversal(root));
+```
+
+Output:
+
+```javascript
+[20, 8, 4, 10, 14, 25, 22];
+```
+
+---
+
+# 5. Complexity Analysis
+
+### Time Complexity
+
+- Left boundary: `O(H)`
+- Right boundary: `O(H)`
+- Leaf traversal: `O(N)`
+
+Overall:
+
+[
+O(N)
+]
+
+### Space Complexity
+
+- Recursion stack during leaf traversal: `O(H)`
+- Right boundary storage: `O(H)`
+
+Overall:
+
+[
+O(H)
+]
+
+where `H` is the height of the tree.
+
+---
+
+# 6. Edge Cases
+
+### Empty Tree
+
+```text
+null
+```
+
+Output:
+
+```text
+[]
+```
+
+---
+
+### Single Node
+
+```text
+1
+```
+
+Output:
+
+```text
+[1]
+```
+
+The root is also a leaf.
+
+---
+
+### Left Skewed Tree
+
+```text
+    1
+   /
+  2
+ /
+3
+```
+
+Output:
+
+```text
+1 2 3
+```
+
+---
+
+### Right Skewed Tree
+
+```text
+1
+ \
+  2
+   \
+    3
+```
+
+Output:
+
+```text
+1 3 2
+```
+
+---
+
+# Common Pitfalls
+
+### 1. Printing leaf nodes twice
+
+If leaf nodes are included in left/right boundary traversal and again during leaf traversal, duplicates occur.
+
+Always exclude leaves while processing boundaries.
+
+---
+
+### 2. Printing right boundary in top-down order
+
+Wrong:
+
+```text
+1 2 3
+```
+
+Correct:
+
+```text
+3 2 1
+```
+
+Right boundary must be added in reverse.
+
+---
+
+### 3. Forgetting the single-node case
+
+If the root is a leaf, return only the root once.
+
+---
+
+# Interview Tips
+
+When asked this question, clearly state:
+
+> "Boundary traversal can be divided into three independent parts: left boundary, leaf nodes, and right boundary. We exclude leaves from the boundary traversals to avoid duplicates and print the right boundary in reverse order."
+
+This demonstrates a clean and interview-preferred `O(N)` solution.
+
 ## Question 2. Vertical order traversal of a binary tree
 
 ## Question 3. Top view of a binary tree
