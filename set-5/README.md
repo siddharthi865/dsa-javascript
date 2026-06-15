@@ -474,6 +474,293 @@ This is the standard and most interview-friendly solution.
 
 ## Question 2. Construct a BST from a sorted array
 
+# Construct a BST from a Sorted Array
+
+## Concise Answer
+
+To construct a **balanced Binary Search Tree (BST)** from a sorted array, repeatedly choose the **middle element as the root**, then recursively build the left and right subtrees.
+
+This ensures the BST is height-balanced.
+
+---
+
+# 1. Problem Understanding
+
+You are given a sorted array (ascending order):
+
+```text
+[-10, -3, 0, 5, 9]
+```
+
+You need to construct a BST such that:
+
+- Inorder traversal of the BST gives the same sorted array
+- The tree is as balanced as possible
+
+Example output structure:
+
+```text
+        0
+       / \
+    -10   5
+      \     \
+      -3     9
+```
+
+---
+
+# 2. Key Insight
+
+A BST property:
+
+```text
+Left subtree < Root < Right subtree
+```
+
+Since the array is already sorted:
+
+- Middle element naturally becomes the root
+- Left half → left subtree
+- Right half → right subtree
+
+---
+
+# 3. Approach 1: Recursive Divide & Conquer (Best Approach)
+
+## Idea
+
+1. Pick middle element → root
+2. Recursively build:
+   - left subtree from left half
+   - right subtree from right half
+
+This guarantees:
+
+- Balanced tree
+- Optimal height: O(log n)
+
+---
+
+## Steps
+
+Given array:
+
+```text
+[-10, -3, 0, 5, 9]
+```
+
+1. mid = 0 → root = 0
+2. left: [-10, -3]
+3. right: [5, 9]
+
+Repeat recursively.
+
+---
+
+# JavaScript Solution
+
+```javascript
+class TreeNode {
+  constructor(val, left = null, right = null) {
+    this.val = val;
+    this.left = left;
+    this.right = right;
+  }
+}
+
+const sortedArrayToBST = (nums) => {
+  const build = (left, right) => {
+    if (left > right) return null;
+
+    const mid = Math.floor((left + right) / 2);
+
+    const root = new TreeNode(nums[mid]);
+
+    root.left = build(left, mid - 1);
+    root.right = build(mid + 1, right);
+
+    return root;
+  };
+
+  return build(0, nums.length - 1);
+};
+```
+
+---
+
+# 4. Complexity Analysis
+
+## Time Complexity
+
+Each element is processed once:
+
+```text
+O(n)
+```
+
+## Space Complexity
+
+Recursive call stack (balanced tree):
+
+```text
+O(log n)
+```
+
+(ignoring output tree space)
+
+---
+
+# 5. Approach 2: Skewed Variant (Less Optimal)
+
+## Idea
+
+Instead of middle, always pick:
+
+- first element → root
+
+This produces:
+
+```text
+-10
+   \
+   -3
+      \
+       0
+         \
+          5
+            \
+             9
+```
+
+### Code
+
+```javascript
+const sortedArrayToBSTSkewed = (nums) => {
+  const build = (index) => {
+    if (index >= nums.length) return null;
+
+    const root = new TreeNode(nums[index]);
+    root.right = build(index + 1);
+
+    return root;
+  };
+
+  return build(0);
+};
+```
+
+### Complexity
+
+- Time: O(n)
+- Space: O(n)
+- ❌ Not balanced
+
+---
+
+# 6. Why Middle Element Works Best
+
+Choosing the middle ensures:
+
+- Left and right subtrees have roughly equal nodes
+- Minimizes height
+- Produces optimal BST
+
+Height becomes:
+
+```text
+O(log n)
+```
+
+instead of:
+
+```text
+O(n)
+```
+
+---
+
+# 7. Edge Cases
+
+### 1. Empty array
+
+```javascript
+sortedArrayToBST([]); // null
+```
+
+---
+
+### 2. Single element
+
+```text
+[10]
+```
+
+Output:
+
+```text
+10
+```
+
+---
+
+### 3. Two elements
+
+```text
+[1, 2]
+```
+
+Possible BST:
+
+```text
+  1
+   \
+    2
+```
+
+or balanced depending on mid choice.
+
+---
+
+### 4. Duplicate values (if allowed)
+
+BST still valid but may need rule:
+
+- duplicates go left or right consistently
+
+---
+
+# 8. Common Mistakes
+
+### ❌ Using linear insertion order
+
+Leads to skewed tree (O(n) height)
+
+---
+
+### ❌ Wrong midpoint calculation
+
+Always use:
+
+```javascript
+Math.floor((left + right) / 2);
+```
+
+---
+
+### ❌ Forgetting base case
+
+```javascript
+if (left > right) return null;
+```
+
+---
+
+# 9. Interview Tips
+
+A strong interview explanation:
+
+> “Since the array is sorted, I use divide and conquer. I pick the middle element as the root to ensure balance, then recursively build left and right subtrees from the two halves. This ensures O(n) time and O(log n) height.”
+
 ## Question 3. Construct a tree from inorder and preorder traversals
 
 ## Question 4. Check if two trees are identical
