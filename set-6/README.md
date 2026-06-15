@@ -343,6 +343,290 @@ Since the majority element appears more than `n/2` times, it still survives afte
 
 ## Question 2. Move all zeros to the end of an array
 
+# Move All Zeros to the End of an Array
+
+## Concise Answer
+
+Given an array, move all `0`s to the end while maintaining the relative order of non-zero elements.
+
+The optimal solution uses the **Two-Pointer Technique**:
+
+- **Time Complexity:** `O(n)`
+- **Space Complexity:** `O(1)`
+
+---
+
+# 1. Problem Understanding
+
+### Example
+
+```js
+Input: [0, 1, 0, 3, 12];
+Output: [1, 3, 12, 0, 0];
+```
+
+Requirements usually are:
+
+1. Move all zeros to the end.
+2. Preserve the order of non-zero elements.
+3. Do it in-place if possible.
+
+---
+
+# 2. Approach 1: Extra Array
+
+### Idea
+
+- Store all non-zero elements in a new array.
+- Append zeros at the end.
+- Copy back if needed.
+
+### JavaScript
+
+```js
+const moveZeroes = (nums) => {
+  const result = [];
+
+  for (const num of nums) {
+    if (num !== 0) {
+      result.push(num);
+    }
+  }
+
+  while (result.length < nums.length) {
+    result.push(0);
+  }
+
+  return result;
+};
+```
+
+### Complexity
+
+- Time: `O(n)`
+- Space: `O(n)`
+
+### Example
+
+```js
+moveZeroes([0, 1, 0, 3, 12]);
+// [1, 3, 12, 0, 0]
+```
+
+---
+
+# 3. Approach 2: Two-Pointer (Optimal)
+
+### Idea
+
+Maintain a pointer `insertPos` indicating where the next non-zero element should go.
+
+1. Traverse the array.
+2. Whenever a non-zero element is found, place it at `insertPos`.
+3. Increment `insertPos`.
+4. After traversal, fill remaining positions with zeros.
+
+---
+
+### Dry Run
+
+```js
+[0, 1, 0, 3, 12];
+```
+
+| Element | insertPos | Array State   |
+| ------- | --------- | ------------- |
+| 0       | 0         | [0,1,0,3,12]  |
+| 1       | 1         | [1,1,0,3,12]  |
+| 0       | 1         | [1,1,0,3,12]  |
+| 3       | 2         | [1,3,0,3,12]  |
+| 12      | 3         | [1,3,12,3,12] |
+
+Fill remaining positions with zeros:
+
+```js
+[1, 3, 12, 0, 0];
+```
+
+---
+
+### JavaScript
+
+```js
+const moveZeroes = (nums) => {
+  let insertPos = 0;
+
+  for (let i = 0; i < nums.length; i++) {
+    if (nums[i] !== 0) {
+      nums[insertPos] = nums[i];
+      insertPos++;
+    }
+  }
+
+  while (insertPos < nums.length) {
+    nums[insertPos] = 0;
+    insertPos++;
+  }
+
+  return nums;
+};
+```
+
+### Complexity
+
+- Time: `O(n)`
+- Space: `O(1)`
+
+---
+
+# 4. Approach 3: Swap-Based Two Pointers
+
+### Idea
+
+Keep:
+
+- `left` → position for next non-zero
+- `right` → current element
+
+Whenever a non-zero is found, swap it with `left`.
+
+---
+
+### JavaScript
+
+```js
+const moveZeroes = (nums) => {
+  let left = 0;
+
+  for (let right = 0; right < nums.length; right++) {
+    if (nums[right] !== 0) {
+      [nums[left], nums[right]] = [nums[right], nums[left]];
+      left++;
+    }
+  }
+
+  return nums;
+};
+```
+
+### Example
+
+```js
+moveZeroes([0, 1, 0, 3, 12]);
+// [1, 3, 12, 0, 0]
+```
+
+### Complexity
+
+- Time: `O(n)`
+- Space: `O(1)`
+- Performs more writes/swaps than Approach 2.
+
+---
+
+# Complexity Comparison
+
+| Approach         | Time | Space |
+| ---------------- | ---- | ----- |
+| Extra Array      | O(n) | O(n)  |
+| Two-Pointer Fill | O(n) | O(1)  |
+| Swap-Based       | O(n) | O(1)  |
+
+---
+
+# Edge Cases
+
+### Empty Array
+
+```js
+[];
+```
+
+Output:
+
+```js
+[];
+```
+
+---
+
+### All Zeros
+
+```js
+[0, 0, 0];
+```
+
+Output:
+
+```js
+[0, 0, 0];
+```
+
+---
+
+### No Zeros
+
+```js
+[1, 2, 3];
+```
+
+Output:
+
+```js
+[1, 2, 3];
+```
+
+---
+
+### Single Element
+
+```js
+[0];
+```
+
+Output:
+
+```js
+[0];
+```
+
+```js
+[5];
+```
+
+Output:
+
+```js
+[5];
+```
+
+---
+
+# Common Pitfalls
+
+### ❌ Using `splice()` repeatedly
+
+```js
+nums.splice(i, 1);
+nums.push(0);
+```
+
+This shifts elements every time and can degrade to **O(n²)**.
+
+### ❌ Not preserving order
+
+Some solutions move zeros correctly but change the order of non-zero elements, which usually violates the problem requirement.
+
+---
+
+# Interview Tips
+
+When asked this question, mention:
+
+> "Since the relative order of non-zero elements must remain unchanged, I'll use a two-pointer approach. One pointer tracks where the next non-zero element should be placed, and after processing all elements, the remaining positions are filled with zeros. This achieves O(n) time and O(1) extra space."
+
+This is the most commonly expected interview solution.
+
 ## Question 3. Merge two sorted arrays without extra space
 
 ## Question 4. Find the first repeating element in an array
