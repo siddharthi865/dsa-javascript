@@ -347,6 +347,403 @@ This demonstrates a clean and interview-preferred `O(N)` solution.
 
 ## Question 2. Vertical order traversal of a binary tree
 
+# Vertical Order Traversal of a Binary Tree
+
+## Concise Answer
+
+In **Vertical Order Traversal**, nodes are grouped according to their **horizontal distance (HD)** from the root:
+
+- Root has HD = 0
+- Left child → HD - 1
+- Right child → HD + 1
+
+We typically use **BFS (Level Order Traversal)** along with a hash map to store nodes for each horizontal distance and then print columns from leftmost HD to rightmost HD.
+
+---
+
+# 1. Problem Understanding
+
+Given a binary tree, print nodes column by column from left to right.
+
+### Example
+
+```text
+        1
+      /   \
+     2     3
+    / \   / \
+   4   5 6   7
+```
+
+Horizontal Distances:
+
+```text
+HD = -2 : 4
+HD = -1 : 2
+HD =  0 : 1, 5, 6
+HD = +1 : 3
+HD = +2 : 7
+```
+
+Output:
+
+```javascript
+[[4], [2], [1, 5, 6], [3], [7]];
+```
+
+---
+
+# 2. Key Observation
+
+Every node belongs to a vertical line determined by its HD.
+
+```text
+root      => HD = 0
+left      => HD - 1
+right     => HD + 1
+```
+
+We need:
+
+1. Compute HD for every node.
+2. Group nodes by HD.
+3. Print groups from smallest HD to largest HD.
+
+---
+
+# 3. Approach 1 (BFS + HashMap) — Preferred
+
+### Idea
+
+Perform level-order traversal while tracking each node's HD.
+
+Use:
+
+- Queue → `(node, hd)`
+- Map → `hd => nodes`
+- Track minimum and maximum HD encountered
+
+---
+
+### Algorithm
+
+1. Start with `(root, 0)`.
+2. Pop a node.
+3. Store node value in `map[hd]`.
+4. Push left child with `hd - 1`.
+5. Push right child with `hd + 1`.
+6. After traversal, iterate from `minHD` to `maxHD`.
+
+---
+
+# 4. JavaScript Solution (BFS)
+
+```javascript
+class TreeNode {
+  constructor(val) {
+    this.val = val;
+    this.left = null;
+    this.right = null;
+  }
+}
+
+const verticalOrderTraversal = (root) => {
+  if (!root) return [];
+
+  const map = new Map();
+  const queue = [[root, 0]];
+
+  let minHD = 0;
+  let maxHD = 0;
+
+  while (queue.length) {
+    const [node, hd] = queue.shift();
+
+    if (!map.has(hd)) {
+      map.set(hd, []);
+    }
+
+    map.get(hd).push(node.val);
+
+    minHD = Math.min(minHD, hd);
+    maxHD = Math.max(maxHD, hd);
+
+    if (node.left) {
+      queue.push([node.left, hd - 1]);
+    }
+
+    if (node.right) {
+      queue.push([node.right, hd + 1]);
+    }
+  }
+
+  const result = [];
+
+  for (let hd = minHD; hd <= maxHD; hd++) {
+    result.push(map.get(hd));
+  }
+
+  return result;
+};
+```
+
+---
+
+# Example Walkthrough
+
+```text
+        1
+      /   \
+     2     3
+    / \   / \
+   4   5 6   7
+```
+
+Queue processing:
+
+```text
+(1,0)
+(2,-1) (3,+1)
+(4,-2) (5,0) (6,0) (7,+2)
+```
+
+Map:
+
+```javascript
+{
+  -2: [4],
+  -1: [2],
+   0: [1,5,6],
+   1: [3],
+   2: [7]
+}
+```
+
+Result:
+
+```javascript
+[[4], [2], [1, 5, 6], [3], [7]];
+```
+
+---
+
+# 5. Approach 2 (DFS + Sorting)
+
+### Idea
+
+Store:
+
+```javascript
+(hd, level, value);
+```
+
+for each node during DFS.
+
+After traversal:
+
+1. Sort by HD.
+2. Group nodes with the same HD.
+
+---
+
+### JavaScript
+
+```javascript
+const verticalOrderDFS = (root) => {
+  const nodes = [];
+
+  const dfs = (node, hd, level) => {
+    if (!node) return;
+
+    nodes.push([hd, level, node.val]);
+
+    dfs(node.left, hd - 1, level + 1);
+    dfs(node.right, hd + 1, level + 1);
+  };
+
+  dfs(root, 0, 0);
+
+  nodes.sort((a, b) => {
+    if (a[0] !== b[0]) return a[0] - b[0];
+    return a[1] - b[1];
+  });
+
+  const map = new Map();
+
+  for (const [hd, level, value] of nodes) {
+    if (!map.has(hd)) {
+      map.set(hd, []);
+    }
+
+    map.get(hd).push(value);
+  }
+
+  return [...map.values()];
+};
+```
+
+---
+
+# 6. Complexity Analysis
+
+## BFS Approach
+
+### Time Complexity
+
+Each node visited once:
+
+[
+O(N)
+]
+
+### Space Complexity
+
+Queue + Map:
+
+[
+O(N)
+]
+
+---
+
+## DFS + Sorting Approach
+
+### Time Complexity
+
+DFS:
+
+[
+O(N)
+]
+
+Sorting:
+
+[
+O(N \log N)
+]
+
+Total:
+
+[
+O(N \log N)
+]
+
+### Space Complexity
+
+[
+O(N)
+]
+
+---
+
+# 7. Edge Cases
+
+### Empty Tree
+
+```text
+null
+```
+
+Output:
+
+```javascript
+[];
+```
+
+---
+
+### Single Node
+
+```text
+1
+```
+
+Output:
+
+```javascript
+[[1]];
+```
+
+---
+
+### Left Skewed Tree
+
+```text
+    1
+   /
+  2
+ /
+3
+```
+
+Output:
+
+```javascript
+[[3], [2], [1]];
+```
+
+---
+
+### Right Skewed Tree
+
+```text
+1
+ \
+  2
+   \
+    3
+```
+
+Output:
+
+```javascript
+[[1], [2], [3]];
+```
+
+---
+
+# Common Pitfalls
+
+### 1. Using DFS without level information
+
+Nodes in the same vertical line may appear in the wrong order.
+
+BFS naturally preserves top-to-bottom ordering.
+
+---
+
+### 2. Forgetting to track min/max HD
+
+You'll need sorting of keys later, increasing complexity.
+
+---
+
+### 3. Using `queue.shift()`
+
+In JavaScript, `shift()` is `O(N)`.
+
+For production-quality code, use a pointer:
+
+```javascript
+let front = 0;
+
+while (front < queue.length) {
+  const [node, hd] = queue[front++];
+}
+```
+
+This keeps BFS truly `O(N)`.
+
+---
+
+# Interview Tips
+
+If asked in an interview, start with:
+
+> "I’ll assign each node a horizontal distance from the root. Using BFS, I can visit nodes level by level while grouping them by horizontal distance in a map. Finally, I output the columns from the minimum HD to the maximum HD. This gives an O(N) solution."
+
+This is the most commonly expected and interview-friendly approach.
+
 ## Question 3. Top view of a binary tree
 
 ## Question 4. Bottom view of a binary tree
