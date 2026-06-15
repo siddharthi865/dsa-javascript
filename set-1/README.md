@@ -275,6 +275,310 @@ Interviewers usually expect these key points:
 
 ## Question 2. Difference between static and dynamic arrays
 
+A **static array** has a **fixed size** decided at allocation time, while a **dynamic array** can **grow or shrink automatically** during runtime.
+
+---
+
+# 1. Quick Comparison
+
+| Feature           | Static Array                    | Dynamic Array                                             |
+| ----------------- | ------------------------------- | --------------------------------------------------------- |
+| Size              | Fixed                           | Resizable                                                 |
+| Memory Allocation | Compile time / fixed allocation | Runtime                                                   |
+| Memory Layout     | Contiguous                      | Usually contiguous                                        |
+| Resize Possible   | ❌ No                           | ✅ Yes                                                    |
+| Insert at End     | Limited                         | Amortized O(1)                                            |
+| Memory Efficiency | Can waste memory                | Better flexibility                                        |
+| Performance       | Slightly faster                 | Slight overhead                                           |
+| Examples          | C arrays                        | JavaScript Array, Java ArrayList, Python list, C++ vector |
+
+---
+
+# 2. Static Array
+
+A static array has a predefined size.
+
+Example in C:
+
+```c id="g2dc0c"
+int arr[5];
+```
+
+This creates space for exactly 5 integers.
+
+---
+
+## Memory Representation
+
+```text id="c1fl7i"
+arr = [10, 20, 30, 40, 50]
+
+┌────┬────┬────┬────┬────┐
+│ 10 │ 20 │ 30 │ 40 │ 50 │
+└────┴────┴────┴────┴────┘
+```
+
+The size cannot change after allocation.
+
+---
+
+## Characteristics
+
+### Advantages
+
+- Very fast access
+- No resizing overhead
+- Better performance predictability
+- Cache friendly
+
+### Disadvantages
+
+- Fixed capacity
+- Memory wastage possible
+- Cannot grow when full
+
+---
+
+## Example Problem
+
+Suppose size is 5:
+
+```text id="wuw2sp"
+[10, 20, 30, _, _]
+```
+
+If more than 5 elements are needed:
+
+```text id="v8p4cx"
+❌ Cannot expand
+```
+
+You must create a new array manually.
+
+---
+
+# 3. Dynamic Array
+
+A dynamic array automatically resizes when capacity is exceeded.
+
+Examples:
+
+- JavaScript `Array`
+- Python `list`
+- Java `ArrayList`
+- C++ `vector`
+
+Example in JavaScript:
+
+```js id="6r0p3d"
+const arr = [];
+
+arr.push(10);
+arr.push(20);
+arr.push(30);
+```
+
+The array grows automatically.
+
+---
+
+# 4. How Dynamic Arrays Work Internally
+
+Dynamic arrays still try to maintain:
+
+```text id="o4p7ca"
+Contiguous memory
+```
+
+When full:
+
+1. Allocate a larger block
+2. Copy old elements
+3. Insert new element
+4. Delete old block
+
+---
+
+## Example Resize
+
+Initial capacity = 4
+
+```text id="nh7rvx"
+[10, 20, 30, 40]
+```
+
+Insert another element:
+
+```text id="m5n0w4"
+Need bigger memory
+```
+
+New capacity might become 8:
+
+```text id="2pxq6g"
+[10, 20, 30, 40, 50]
+```
+
+Elements are copied into the new block.
+
+---
+
+# 5. Dynamic Array Growth Strategy
+
+Most implementations grow by:
+
+```text id="ih3r8u"
+New Capacity = Old Capacity × 2
+```
+
+Example:
+
+```text id="ykh2ks"
+1 → 2 → 4 → 8 → 16
+```
+
+This keeps append operations efficient.
+
+---
+
+# 6. Time Complexity Comparison
+
+| Operation            | Static Array         | Dynamic Array      |
+| -------------------- | -------------------- | ------------------ |
+| Access               | O(1)                 | O(1)               |
+| Update               | O(1)                 | O(1)               |
+| Append               | O(1) if space exists | Amortized O(1)     |
+| Insert/Delete Middle | O(n)                 | O(n)               |
+| Resize               | ❌ Not possible      | O(n) during resize |
+
+---
+
+# 7. Why Dynamic Array Append Is Amortized O(1)
+
+Most insertions do NOT trigger resizing.
+
+Occasional resize takes O(n), but it happens infrequently.
+
+So average insertion cost becomes:
+
+```text id="7qgj8v"
+Amortized O(1)
+```
+
+---
+
+# 8. Memory Allocation Difference
+
+## Static Array
+
+Memory allocated once:
+
+```text id="im8u4w"
+┌────┬────┬────┬────┐
+│    Fixed Block   │
+└────┴────┴────┴────┘
+```
+
+---
+
+## Dynamic Array
+
+May relocate during resizing:
+
+```text id="o4yv0w"
+Old Block → New Larger Block
+```
+
+This relocation is invisible to the programmer.
+
+---
+
+# 9. JavaScript Perspective
+
+JavaScript arrays are dynamic arrays.
+
+Example:
+
+```js id="9w4p0w"
+const arr = [];
+
+for (let i = 0; i < 1000; i++) {
+  arr.push(i);
+}
+```
+
+The engine automatically resizes internally.
+
+However, JS arrays are more advanced than traditional dynamic arrays because they can also:
+
+- store mixed types
+- become sparse
+- optimize differently internally
+
+---
+
+# 10. When to Use Which
+
+## Use Static Arrays When
+
+- Size is known beforehand
+- Performance is critical
+- Memory usage must be predictable
+- Working in low-level systems
+
+Examples:
+
+- Embedded systems
+- Fixed buffers
+
+---
+
+## Use Dynamic Arrays When
+
+- Size changes frequently
+- Ease of use matters
+- Building general applications
+
+Examples:
+
+- Most application development
+- Data collections
+- APIs
+
+---
+
+# 11. Common Interview Follow-Ups
+
+Interviewers often ask:
+
+### Why is dynamic array append amortized O(1)?
+
+Because resizing happens occasionally, not on every insertion.
+
+---
+
+### Why are arrays cache friendly?
+
+Because elements are stored contiguously.
+
+---
+
+### Why are insertions expensive?
+
+Because elements must shift.
+
+---
+
+### What happens during resizing?
+
+A new larger contiguous block is allocated and elements are copied.
+
+---
+
+# 12. Interview-Friendly Summary
+
+> A static array has a fixed size and cannot grow after allocation, while a dynamic array resizes automatically during runtime. Both usually store elements contiguously in memory and provide O(1) indexing. Dynamic arrays achieve flexible growth by allocating a larger block and copying elements when capacity is exceeded, making append operations amortized O(1).
+
 ## Question 3. How to find the maximum and minimum element in an array?
 
 ## Question 4. Reverse an array in-place
