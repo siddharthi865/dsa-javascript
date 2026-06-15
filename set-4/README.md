@@ -273,6 +273,259 @@ Selection Sort should swap **once per outer iteration**, after the minimum eleme
 
 ## Question 2. Implement merge sort
 
+# Merge Sort
+
+## Direct Answer
+
+Merge Sort is a **divide-and-conquer sorting algorithm** that splits the array into halves, recursively sorts them, and then merges the sorted halves.
+
+It has a guaranteed time complexity of **O(n log n)** and is stable.
+
+---
+
+# 1. Problem Understanding
+
+Given an array, sort it in ascending order using Merge Sort.
+
+Key idea:
+
+- Divide array into two halves
+- Recursively sort each half
+- Merge the sorted halves into a single sorted array
+
+---
+
+# 2. Approach 1: Recursive Merge Sort (Standard)
+
+### Idea
+
+1. If array has 0 or 1 element → already sorted
+2. Split array into two halves
+3. Recursively sort both halves
+4. Merge them using a helper function
+
+---
+
+## Merge Logic (Core Step)
+
+We maintain two pointers:
+
+- `i` → left array
+- `j` → right array
+
+Pick smaller element each time.
+
+---
+
+# 3. JavaScript Implementation
+
+```js
+const mergeSort = (arr) => {
+  if (arr.length <= 1) return arr;
+
+  const mid = Math.floor(arr.length / 2);
+
+  const left = mergeSort(arr.slice(0, mid));
+  const right = mergeSort(arr.slice(mid));
+
+  return merge(left, right);
+};
+
+const merge = (left, right) => {
+  let i = 0;
+  let j = 0;
+  const result = [];
+
+  while (i < left.length && j < right.length) {
+    if (left[i] <= right[j]) {
+      result.push(left[i]);
+      i++;
+    } else {
+      result.push(right[j]);
+      j++;
+    }
+  }
+
+  // Add remaining elements
+  while (i < left.length) result.push(left[i++]);
+  while (j < right.length) result.push(right[j++]);
+
+  return result;
+};
+
+// Example
+const arr = [38, 27, 43, 3, 9, 82, 10];
+console.log(mergeSort(arr));
+```
+
+---
+
+# 4. Approach 2: Optimized (Using Auxiliary Array)
+
+This avoids repeated slicing (which creates extra arrays).
+
+### Idea:
+
+- Use a single temporary array
+- Work with index ranges
+
+---
+
+## JavaScript Implementation
+
+```js
+const mergeSort = (arr) => {
+  const temp = new Array(arr.length);
+  divide(arr, temp, 0, arr.length - 1);
+  return arr;
+};
+
+const divide = (arr, temp, left, right) => {
+  if (left >= right) return;
+
+  const mid = Math.floor((left + right) / 2);
+
+  divide(arr, temp, left, mid);
+  divide(arr, temp, mid + 1, right);
+
+  merge(arr, temp, left, mid, right);
+};
+
+const merge = (arr, temp, left, mid, right) => {
+  let i = left;
+  let j = mid + 1;
+  let k = left;
+
+  while (i <= mid && j <= right) {
+    if (arr[i] <= arr[j]) {
+      temp[k++] = arr[i++];
+    } else {
+      temp[k++] = arr[j++];
+    }
+  }
+
+  while (i <= mid) temp[k++] = arr[i++];
+  while (j <= right) temp[k++] = arr[j++];
+
+  for (let idx = left; idx <= right; idx++) {
+    arr[idx] = temp[idx];
+  }
+};
+
+const arr2 = [38, 27, 43, 3, 9, 82, 10];
+console.log(mergeSort(arr2));
+```
+
+---
+
+# 5. Complexity Analysis
+
+| Case         | Complexity |
+| ------------ | ---------- |
+| Best Case    | O(n log n) |
+| Average Case | O(n log n) |
+| Worst Case   | O(n log n) |
+
+### Space Complexity
+
+- O(n) (due to temporary arrays)
+
+---
+
+### Why O(n log n)?
+
+- Array is divided into log n levels
+- Each level takes O(n) time to merge
+
+So:
+
+```text
+O(n) × O(log n) = O(n log n)
+```
+
+---
+
+# 6. Edge Cases
+
+### Empty Array
+
+```js
+[];
+```
+
+### Single Element
+
+```js
+[5];
+```
+
+### Already Sorted
+
+```js
+[1, 2, 3, 4];
+```
+
+### Reverse Sorted
+
+```js
+[9, 7, 5, 3, 1];
+```
+
+Merge sort handles all cases efficiently.
+
+---
+
+# 7. Common Pitfalls
+
+### 1. Forgetting merge step correctness
+
+- Must handle leftover elements
+
+### 2. Using slice-heavy implementation in interviews
+
+- Interviewers often prefer index-based approach
+
+### 3. Incorrect mid calculation
+
+```js
+Math.floor((l + r) / 2);
+```
+
+---
+
+# 8. Advantages & Disadvantages
+
+## Advantages
+
+- Stable sort
+- Predictable O(n log n)
+- Works well for linked lists
+- Good for large datasets
+
+## Disadvantages
+
+- Requires O(n) extra space
+- Slower than quicksort in practice due to memory overhead
+
+---
+
+# 9. Interview Tips
+
+- Always mention both implementations:
+  - Simple recursive (easy to explain)
+  - Optimized index-based (preferred in interviews)
+
+- Emphasize:
+  - Divide and conquer
+  - Stability
+  - Guaranteed O(n log n)
+
+---
+
+## Interview Summary
+
+> Merge Sort is a divide-and-conquer algorithm that splits the array into halves, recursively sorts them, and merges sorted halves. It runs in O(n log n) time in all cases and requires O(n) extra space, making it stable and predictable but memory-intensive.
+
 ## Question 3. Implement quicksort
 
 ## Question 4. Count inversions in an array
