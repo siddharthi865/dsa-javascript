@@ -410,6 +410,422 @@ This demonstrates knowledge of both **cycle detection** and **cycle removal**, w
 
 ## Question 2. Check if a linked list is a palindrome
 
+# Check if a Linked List is a Palindrome
+
+## Concise Answer
+
+A linked list is a palindrome if it reads the same forward and backward.
+
+The **optimal approach** is:
+
+1. Find the middle of the linked list using slow and fast pointers.
+2. Reverse the second half.
+3. Compare the first half and reversed second half.
+4. (Optional) Restore the list.
+
+**Time Complexity:** O(n)
+**Space Complexity:** O(1)
+
+---
+
+# 1. Problem Understanding
+
+Given the head of a singly linked list, determine whether it is a palindrome.
+
+### Example 1
+
+```text
+1 → 2 → 2 → 1
+```
+
+Output:
+
+```text
+true
+```
+
+---
+
+### Example 2
+
+```text
+1 → 2 → 3 → 2 → 1
+```
+
+Output:
+
+```text
+true
+```
+
+---
+
+### Example 3
+
+```text
+1 → 2 → 3
+```
+
+Output:
+
+```text
+false
+```
+
+---
+
+# Approach 1: Reverse the Second Half (Optimal)
+
+## Idea
+
+Instead of storing values, we can:
+
+1. Find the middle node.
+2. Reverse the second half of the list.
+3. Compare nodes from both halves.
+4. If all values match, it's a palindrome.
+
+---
+
+## Visualization
+
+### Original List
+
+```text
+1 → 2 → 3 → 2 → 1
+          ↑
+       middle
+```
+
+### Reverse Second Half
+
+```text
+First Half:   1 → 2 → 3
+
+Second Half:  1 → 2
+```
+
+### Compare
+
+```text
+1 == 1
+2 == 2
+```
+
+All match → palindrome.
+
+---
+
+# JavaScript Solution (Optimal)
+
+```javascript
+class ListNode {
+  constructor(val) {
+    this.val = val;
+    this.next = null;
+  }
+}
+
+const isPalindrome = (head) => {
+  if (!head || !head.next) return true;
+
+  // Find middle
+  let slow = head;
+  let fast = head;
+
+  while (fast && fast.next) {
+    slow = slow.next;
+    fast = fast.next.next;
+  }
+
+  // For odd-length lists, skip middle node
+  if (fast) {
+    slow = slow.next;
+  }
+
+  // Reverse second half
+  let prev = null;
+  let curr = slow;
+
+  while (curr) {
+    const next = curr.next;
+    curr.next = prev;
+    prev = curr;
+    curr = next;
+  }
+
+  // Compare both halves
+  let first = head;
+  let second = prev;
+
+  while (second) {
+    if (first.val !== second.val) {
+      return false;
+    }
+
+    first = first.next;
+    second = second.next;
+  }
+
+  return true;
+};
+```
+
+---
+
+# Complexity Analysis
+
+| Operation      | Complexity |
+| -------------- | ---------- |
+| Find middle    | O(n)       |
+| Reverse half   | O(n)       |
+| Compare halves | O(n)       |
+| Total Time     | O(n)       |
+| Extra Space    | O(1)       |
+
+---
+
+# Approach 2: Using a Stack
+
+## Idea
+
+Store all node values in a stack.
+
+Then traverse again and compare each node with the top of the stack.
+
+---
+
+## JavaScript
+
+```javascript
+const isPalindrome = (head) => {
+  const stack = [];
+
+  let curr = head;
+
+  while (curr) {
+    stack.push(curr.val);
+    curr = curr.next;
+  }
+
+  curr = head;
+
+  while (curr) {
+    if (curr.val !== stack.pop()) {
+      return false;
+    }
+
+    curr = curr.next;
+  }
+
+  return true;
+};
+```
+
+---
+
+## Complexity
+
+| Time | Space |
+| ---- | ----- |
+| O(n) | O(n)  |
+
+---
+
+# Approach 3: Convert to Array
+
+## Idea
+
+Store values in an array and use two pointers.
+
+---
+
+## JavaScript
+
+```javascript
+const isPalindrome = (head) => {
+  const values = [];
+
+  let curr = head;
+
+  while (curr) {
+    values.push(curr.val);
+    curr = curr.next;
+  }
+
+  let left = 0;
+  let right = values.length - 1;
+
+  while (left < right) {
+    if (values[left] !== values[right]) {
+      return false;
+    }
+
+    left++;
+    right--;
+  }
+
+  return true;
+};
+```
+
+---
+
+## Complexity
+
+| Time | Space |
+| ---- | ----- |
+| O(n) | O(n)  |
+
+---
+
+# Edge Cases
+
+### 1. Empty List
+
+```text
+null
+```
+
+Output:
+
+```text
+true
+```
+
+(An empty list is considered a palindrome.)
+
+---
+
+### 2. Single Node
+
+```text
+1
+```
+
+Output:
+
+```text
+true
+```
+
+---
+
+### 3. Two Equal Nodes
+
+```text
+1 → 1
+```
+
+Output:
+
+```text
+true
+```
+
+---
+
+### 4. Two Different Nodes
+
+```text
+1 → 2
+```
+
+Output:
+
+```text
+false
+```
+
+---
+
+### 5. Odd Length
+
+```text
+1 → 2 → 3 → 2 → 1
+```
+
+Output:
+
+```text
+true
+```
+
+Middle node (`3`) is ignored during comparison.
+
+---
+
+### 6. Even Length
+
+```text
+1 → 2 → 2 → 1
+```
+
+Output:
+
+```text
+true
+```
+
+---
+
+# Common Pitfalls
+
+### 1. Forgetting Odd-Length Handling
+
+For:
+
+```text
+1 → 2 → 3 → 2 → 1
+```
+
+The middle node (`3`) should not be compared.
+
+```javascript
+if (fast) {
+  slow = slow.next;
+}
+```
+
+---
+
+### 2. Comparing Values Incorrectly
+
+Compare node values:
+
+```javascript
+first.val === second.val;
+```
+
+Not node references:
+
+```javascript
+first === second; // Wrong
+```
+
+---
+
+### 3. Losing the List Structure
+
+Reversing the second half modifies the list.
+
+In production code, you may want to reverse it back after comparison.
+
+---
+
+# Interview Tip
+
+If asked in an interview:
+
+> "I would use the slow-fast pointer technique to find the middle, reverse the second half in-place, and compare both halves. This achieves O(n) time and O(1) extra space, which is the optimal solution."
+
+This demonstrates knowledge of:
+
+- Fast & slow pointers
+- In-place reversal
+- Space optimization
+- Linked list manipulation techniques
+
 ## Question 3. Add two numbers represented as linked lists
 
 ## Question 4. Flatten a multilevel linked list
