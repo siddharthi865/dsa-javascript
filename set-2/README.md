@@ -329,6 +329,243 @@ This demonstrates awareness of both brute-force and optimal approaches, which in
 
 ## Question 2. Find the middle element of a linked list
 
+# Find the Middle Element of a Linked List
+
+## Direct Answer
+
+Use the **Slow and Fast Pointer technique** (Floyd’s approach):
+
+- `slow` moves 1 step at a time
+- `fast` moves 2 steps at a time
+  When `fast` reaches the end, `slow` will be at the middle node.
+
+---
+
+# 1. Problem Understanding
+
+Given the head of a singly linked list, return the **middle node**.
+
+### Two cases:
+
+- **Odd length** → one middle element
+- **Even length** → usually return:
+  - second middle (common in interviews), or
+  - first middle (depends on problem statement)
+
+Example:
+
+```
+1 → 2 → 3 → 4 → 5
+        ↑
+      middle = 3
+```
+
+---
+
+# 2. Approach 1: Two-Pass (Count + Traverse)
+
+### Idea
+
+1. Traverse list to count nodes `n`
+2. Traverse again till `n/2`
+
+### JavaScript Code
+
+```js
+const findMiddle = (head) => {
+  let count = 0;
+  let temp = head;
+
+  while (temp) {
+    count++;
+    temp = temp.next;
+  }
+
+  let mid = Math.floor(count / 2);
+  temp = head;
+
+  while (mid > 0) {
+    temp = temp.next;
+    mid--;
+  }
+
+  return temp;
+};
+```
+
+### Complexity
+
+| Metric | Value |
+| ------ | ----- |
+| Time   | O(n)  |
+| Space  | O(1)  |
+
+### Pros
+
+- Simple to understand
+
+### Cons
+
+- Requires two traversals
+
+---
+
+# 3. Approach 2: Optimal (Slow & Fast Pointer)
+
+### Idea
+
+Move:
+
+- `slow` → 1 step
+- `fast` → 2 steps
+
+When `fast` reaches end, `slow` is at middle.
+
+---
+
+### Key Insight
+
+- Fast moves twice as fast → covers full list in half time
+- So slow lands exactly in the middle
+
+---
+
+### JavaScript Code
+
+```js
+const findMiddle = (head) => {
+  let slow = head;
+  let fast = head;
+
+  while (fast && fast.next) {
+    slow = slow.next;
+    fast = fast.next.next;
+  }
+
+  return slow;
+};
+```
+
+---
+
+# Complexity Analysis
+
+| Metric | Value |
+| ------ | ----- |
+| Time   | O(n)  |
+| Space  | O(1)  |
+
+This is the **best interview solution**.
+
+---
+
+# 4. Even-Length Behavior
+
+### Example:
+
+```
+1 → 2 → 3 → 4 → 5 → 6
+```
+
+Iteration:
+
+| slow | fast      |
+| ---- | --------- |
+| 1    | 1         |
+| 2    | 3         |
+| 3    | 5         |
+| 4    | null stop |
+
+👉 Returns **4 (second middle)**
+
+---
+
+# 5. Edge Cases
+
+### Empty List
+
+```
+null → return null
+```
+
+### Single Node
+
+```
+1 → return 1
+```
+
+### Two Nodes
+
+```
+1 → 2 → returns 2 (second middle)
+```
+
+---
+
+# 6. Common Pitfalls
+
+### ❌ Incorrect loop condition
+
+```js
+while (fast.next && fast)
+```
+
+This can crash if `fast` is null.
+
+### ✅ Correct
+
+```js
+while (fast && fast.next)
+```
+
+---
+
+### ❌ Using fast only once per iteration
+
+Must move:
+
+```js
+fast = fast.next.next;
+```
+
+---
+
+# 7. Variations Asked in Interviews
+
+You may be asked:
+
+### 1. Return first middle instead of second
+
+Modify condition:
+
+```js
+while (fast.next && fast.next.next)
+```
+
+---
+
+### 2. Find middle and delete it
+
+Combine slow pointer with previous tracking.
+
+---
+
+# 8. Interview Tip
+
+Always say:
+
+> “The optimal solution uses slow and fast pointers in a single traversal, achieving O(n) time and O(1) space.”
+
+If you mention both approaches (two-pass + fast/slow), it shows strong fundamentals.
+
+---
+
+If you want next level, I can also cover:
+
+- Reverse middle half of linked list
+- Check palindrome linked list
+- Find middle in circular linked list (tricky follow-up)
+
 ## Question 3. Merge two sorted linked lists
 
 ## Question 4. Remove duplicates from a linked list
