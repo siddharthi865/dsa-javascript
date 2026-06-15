@@ -446,6 +446,441 @@ This is a classic interview problem asked by companies such as Google, Amazon, M
 
 ## Question 2. Sort nearly sorted (k-sorted) array
 
+# Sort a Nearly Sorted (K-Sorted) Array
+
+## Concise Answer
+
+A **k-sorted array** is an array where every element is at most `k` positions away from its correct position in the sorted order.
+
+The optimal solution uses a **Min Heap (Priority Queue)** of size `k + 1`.
+
+- **Time Complexity:** `O(n log k)`
+- **Space Complexity:** `O(k)`
+
+---
+
+# 1. Problem Understanding
+
+Given a k-sorted array, sort it efficiently.
+
+### Example
+
+```js
+Input: arr = [6, 5, 3, 2, 8, 10, 9];
+k = 3;
+
+Output: [2, 3, 5, 6, 8, 9, 10];
+```
+
+### Why not use normal sorting?
+
+A standard sort takes:
+
+```text
+O(n log n)
+```
+
+But since the array is already "almost sorted", we can do better using the property that each element is at most `k` positions away from its final position.
+
+---
+
+# 2. Key Observation
+
+Consider:
+
+```js
+[6, 5, 3, 2];
+```
+
+with `k = 3`.
+
+The smallest element that should come first must be among the first `k + 1` elements.
+
+### Reason
+
+If an element can move at most `k` positions:
+
+```text
+Correct position of any element
+must lie within a window of size k+1.
+```
+
+Therefore:
+
+1. Put first `k+1` elements into a min heap.
+2. Extract the minimum.
+3. Add the next array element.
+4. Repeat.
+
+---
+
+# 3. Approach: Min Heap (Optimal)
+
+## Algorithm
+
+1. Insert first `k + 1` elements into a min heap.
+2. Repeatedly:
+   - Extract minimum.
+   - Place it into the result.
+   - Insert next element from array.
+
+3. After processing all elements:
+   - Extract remaining heap elements.
+
+---
+
+## Example Dry Run
+
+```js
+arr = [6, 5, 3, 2, 8, 10, 9];
+k = 3;
+```
+
+### Initial Heap
+
+```js
+[6, 5, 3, 2];
+```
+
+Min Heap:
+
+```js
+[2, 3, 5, 6];
+```
+
+Extract:
+
+```js
+2;
+```
+
+Add:
+
+```js
+8;
+```
+
+Heap:
+
+```js
+[3, 6, 5, 8];
+```
+
+Extract:
+
+```js
+3;
+```
+
+Add:
+
+```js
+10;
+```
+
+Heap:
+
+```js
+[5, 6, 8, 10];
+```
+
+Continue until finished.
+
+Result:
+
+```js
+[2, 3, 5, 6, 8, 9, 10];
+```
+
+---
+
+# 4. JavaScript Implementation
+
+Since JavaScript does not provide a built-in priority queue, we'll implement a Min Heap.
+
+```js
+class MinHeap {
+  constructor() {
+    this.heap = [];
+  }
+
+  size() {
+    return this.heap.length;
+  }
+
+  peek() {
+    return this.heap[0];
+  }
+
+  insert(value) {
+    this.heap.push(value);
+    this.bubbleUp();
+  }
+
+  bubbleUp() {
+    let index = this.heap.length - 1;
+
+    while (index > 0) {
+      let parent = Math.floor((index - 1) / 2);
+
+      if (this.heap[parent] <= this.heap[index]) break;
+
+      [this.heap[parent], this.heap[index]] = [
+        this.heap[index],
+        this.heap[parent],
+      ];
+
+      index = parent;
+    }
+  }
+
+  extractMin() {
+    if (this.heap.length === 1) {
+      return this.heap.pop();
+    }
+
+    const min = this.heap[0];
+
+    this.heap[0] = this.heap.pop();
+    this.bubbleDown();
+
+    return min;
+  }
+
+  bubbleDown() {
+    let index = 0;
+    const length = this.heap.length;
+
+    while (true) {
+      let left = 2 * index + 1;
+      let right = 2 * index + 2;
+      let smallest = index;
+
+      if (left < length && this.heap[left] < this.heap[smallest]) {
+        smallest = left;
+      }
+
+      if (right < length && this.heap[right] < this.heap[smallest]) {
+        smallest = right;
+      }
+
+      if (smallest === index) break;
+
+      [this.heap[index], this.heap[smallest]] = [
+        this.heap[smallest],
+        this.heap[index],
+      ];
+
+      index = smallest;
+    }
+  }
+}
+
+const sortKSortedArray = (arr, k) => {
+  const heap = new MinHeap();
+  const result = [];
+
+  let i = 0;
+
+  for (; i <= k && i < arr.length; i++) {
+    heap.insert(arr[i]);
+  }
+
+  while (i < arr.length) {
+    result.push(heap.extractMin());
+    heap.insert(arr[i]);
+    i++;
+  }
+
+  while (heap.size()) {
+    result.push(heap.extractMin());
+  }
+
+  return result;
+};
+
+// Example
+console.log(sortKSortedArray([6, 5, 3, 2, 8, 10, 9], 3));
+```
+
+Output:
+
+```js
+[2, 3, 5, 6, 8, 9, 10];
+```
+
+---
+
+# 5. Complexity Analysis
+
+### Heap Size
+
+```text
+At most k + 1 elements
+```
+
+### Operations
+
+For each element:
+
+```text
+Insert  -> O(log k)
+Remove  -> O(log k)
+```
+
+Total:
+
+```text
+O(n log k)
+```
+
+### Space
+
+```text
+Heap size = O(k)
+```
+
+---
+
+# 6. Alternative Approaches
+
+## Approach 1: Normal Sorting
+
+```js
+arr.sort((a, b) => a - b);
+```
+
+### Complexity
+
+```text
+Time:  O(n log n)
+Space: Depends on implementation
+```
+
+Not optimal because it ignores the k-sorted property.
+
+---
+
+## Approach 2: Insertion Sort
+
+Since elements are close to their correct positions:
+
+```text
+Average performance improves.
+```
+
+### Complexity
+
+```text
+Worst Case: O(nk)
+```
+
+Useful when `k` is very small.
+
+```js
+const insertionSortKSorted = (arr) => {
+  for (let i = 1; i < arr.length; i++) {
+    let key = arr[i];
+    let j = i - 1;
+
+    while (j >= 0 && arr[j] > key) {
+      arr[j + 1] = arr[j];
+      j--;
+    }
+
+    arr[j + 1] = key;
+  }
+
+  return arr;
+};
+```
+
+---
+
+# 7. Edge Cases
+
+### Empty Array
+
+```js
+arr = [];
+k = 3;
+```
+
+Output:
+
+```js
+[];
+```
+
+---
+
+### Single Element
+
+```js
+[5];
+```
+
+Output:
+
+```js
+[5];
+```
+
+---
+
+### k = 0
+
+Array is already sorted.
+
+```js
+[1, 2, 3, 4];
+```
+
+Output:
+
+```js
+[1, 2, 3, 4];
+```
+
+Complexity becomes:
+
+```text
+O(n)
+```
+
+---
+
+### k >= n
+
+Heap contains entire array.
+
+Complexity becomes:
+
+```text
+O(n log n)
+```
+
+Same as standard heap sort.
+
+---
+
+# 8. Interview Tips
+
+- Immediately identify this as a **Min Heap / Priority Queue** problem.
+- State the key observation:
+
+  > "The smallest element among the next `k+1` elements must be the next element in the sorted order."
+
+- Mention why the heap size is exactly `k+1`.
+- Explain that the optimized complexity is:
+
+```text
+Time  : O(n log k)
+Space : O(k)
+```
+
+This is the expected interview solution and is significantly better than `O(n log n)` when `k << n`.
+
 ## Question 3. Find the k closest elements to a given value
 
 ## Question 4. Search in a bitonic array
