@@ -255,6 +255,346 @@ All of these are classic applications of **Catalan Numbers**.
 
 ## Question 2. Find distance between two nodes in a BST
 
+# Find Distance Between Two Nodes in a BST
+
+## Direct Answer
+
+The distance between two nodes in a BST is the number of edges on the shortest path between them.
+
+A common and efficient approach is:
+
+1. Find the **Lowest Common Ancestor (LCA)** of the two nodes.
+2. Find the distance from the LCA to each node.
+3. Add the two distances.
+
+```text
+Distance(u, v) =
+Distance(LCA, u) + Distance(LCA, v)
+```
+
+---
+
+# 1. Problem Understanding
+
+Given a BST and two node values `a` and `b`, find the number of edges between them.
+
+Example:
+
+```text
+        20
+       /  \
+      10   30
+     / \   / \
+    5  15 25 35
+```
+
+Find distance between `5` and `15`.
+
+Path:
+
+```text
+5 → 10 → 15
+```
+
+Distance = **2 edges**
+
+---
+
+# 2. Key Observation (BST Property)
+
+In a BST:
+
+```text
+Left subtree  < Root
+Right subtree > Root
+```
+
+Using this property, we can find the LCA efficiently.
+
+### LCA Rules
+
+For nodes `a` and `b`:
+
+- If both are smaller than current node → go left.
+- If both are greater than current node → go right.
+- Otherwise, current node is the LCA.
+
+---
+
+# 3. Approach 1 (Optimal)
+
+## Step 1: Find LCA
+
+Example:
+
+```text
+a = 5, b = 15
+
+At 20:
+Both < 20
+Go left
+
+At 10:
+5 < 10 < 15
+
+LCA = 10
+```
+
+---
+
+## Step 2: Find Distance from LCA to Each Node
+
+```text
+Distance(10,5) = 1
+Distance(10,15) = 1
+```
+
+Total:
+
+```text
+1 + 1 = 2
+```
+
+---
+
+# JavaScript Solution
+
+```javascript
+class TreeNode {
+  constructor(val) {
+    this.val = val;
+    this.left = null;
+    this.right = null;
+  }
+}
+
+const findLCA = (root, a, b) => {
+  while (root) {
+    if (a < root.val && b < root.val) {
+      root = root.left;
+    } else if (a > root.val && b > root.val) {
+      root = root.right;
+    } else {
+      return root;
+    }
+  }
+
+  return null;
+};
+
+const findDistanceFromNode = (root, target) => {
+  let distance = 0;
+
+  while (root && root.val !== target) {
+    if (target < root.val) {
+      root = root.left;
+    } else {
+      root = root.right;
+    }
+    distance++;
+  }
+
+  return root ? distance : -1;
+};
+
+const distanceBetweenNodes = (root, a, b) => {
+  const lca = findLCA(root, a, b);
+
+  const d1 = findDistanceFromNode(lca, a);
+  const d2 = findDistanceFromNode(lca, b);
+
+  if (d1 === -1 || d2 === -1) return -1;
+
+  return d1 + d2;
+};
+```
+
+---
+
+# Example Walkthrough
+
+```text
+        20
+       /  \
+      10   30
+     / \   / \
+    5  15 25 35
+```
+
+```javascript
+distanceBetweenNodes(root, 5, 15);
+```
+
+### Finding LCA
+
+```text
+20 -> both smaller
+10 -> split occurs
+
+LCA = 10
+```
+
+### Distances
+
+```text
+10 → 5  = 1
+10 → 15 = 1
+```
+
+Answer:
+
+```text
+2
+```
+
+---
+
+# 4. Alternative Approach
+
+Find:
+
+```text
+Distance(root, a)
+Distance(root, b)
+Distance(root, LCA)
+```
+
+Then:
+
+```text
+Distance(a,b)
+=
+Distance(root,a)
++
+Distance(root,b)
+-
+2 × Distance(root,LCA)
+```
+
+This is commonly used in general trees as well.
+
+---
+
+## JavaScript
+
+```javascript
+const distanceFromRoot = (root, target) => {
+  let dist = 0;
+
+  while (root && root.val !== target) {
+    root = target < root.val ? root.left : root.right;
+    dist++;
+  }
+
+  return root ? dist : -1;
+};
+
+const distanceBetweenNodes = (root, a, b) => {
+  const lca = findLCA(root, a, b);
+
+  const da = distanceFromRoot(root, a);
+  const db = distanceFromRoot(root, b);
+  const dlca = distanceFromRoot(root, lca.val);
+
+  return da + db - 2 * dlca;
+};
+```
+
+---
+
+# Complexity Analysis
+
+### Optimal BST Approach
+
+| Operation               | Complexity |
+| ----------------------- | ---------- |
+| Find LCA                | O(h)       |
+| Distance to first node  | O(h)       |
+| Distance to second node | O(h)       |
+
+Total:
+
+```text
+Time: O(h)
+Space: O(1)
+```
+
+Where `h` is the height of the BST.
+
+- Balanced BST → **O(log n)**
+- Skewed BST → **O(n)**
+
+---
+
+# Edge Cases
+
+### Same Node
+
+```text
+a = b = 10
+```
+
+Distance:
+
+```text
+0
+```
+
+---
+
+### One Node is Ancestor of Other
+
+```text
+10 and 15
+```
+
+Path:
+
+```text
+10 → 15
+```
+
+Distance:
+
+```text
+1
+```
+
+---
+
+### Node Not Present
+
+```text
+a = 5
+b = 100
+```
+
+Return:
+
+```text
+-1
+```
+
+(or handle according to problem requirements)
+
+---
+
+# Interview Tips
+
+- Mention that BST properties allow finding the LCA in **O(h)** without storing paths.
+- State the formula:
+
+```text
+Distance(u,v) =
+Distance(LCA,u) + Distance(LCA,v)
+```
+
+- Clarify whether distance means:
+  - **Number of edges** (most common), or
+  - **Number of nodes in the path** (occasionally asked).
+
+This is the expected optimal interview solution for finding the distance between two nodes in a BST.
+
 ## Question 3. Convert a BST to a sorted doubly linked list
 
 ## Question 4. Find the Kth smallest or Kth largest element in a BST
