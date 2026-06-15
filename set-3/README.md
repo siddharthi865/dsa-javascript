@@ -318,6 +318,215 @@ This distinction often determines whether the interviewer expects the optimized 
 
 ## Question 2. Find the diameter of a binary tree
 
+# Diameter of a Binary Tree
+
+## Direct Answer
+
+The **diameter of a binary tree** is the length (or number of edges/nodes depending on definition) of the **longest path between any two nodes in the tree**.
+
+Most commonly in interviews:
+
+> Diameter = maximum value of (left height + right height) at every node.
+
+We compute it using a **postorder DFS (bottom-up traversal)** in O(n) time.
+
+---
+
+# 1. Problem Understanding
+
+You are given a binary tree, and you must find the longest path between any two nodes.
+
+### Important Clarification (Interview Tip)
+
+There are two common definitions:
+
+- **Edges-based diameter (most common):** number of edges
+- **Nodes-based diameter:** number of nodes in the path
+
+We will assume:
+
+> **Diameter = number of edges in the longest path**
+
+---
+
+### Example
+
+```text
+        1
+       / \
+      2   3
+     / \
+    4   5
+```
+
+Longest path: `4 → 2 → 1 → 3`
+Diameter = **3 edges**
+
+---
+
+# 2. Brute Force Approach (O(n²))
+
+### Idea
+
+For every node:
+
+1. Compute height of left subtree
+2. Compute height of right subtree
+3. Update answer = max(ans, leftHeight + rightHeight)
+
+But height is recomputed repeatedly.
+
+### Complexity
+
+- Time: **O(n²)**
+- Space: **O(h)** recursion stack
+
+Not optimal.
+
+---
+
+# 3. Optimized Approach: Single DFS (Postorder) ⭐
+
+## Key Insight
+
+While computing height, also compute diameter in the same traversal.
+
+At each node:
+
+- Left height = height(left subtree)
+- Right height = height(right subtree)
+- Possible diameter through node = leftHeight + rightHeight
+- Update global max
+
+Then return height:
+
+[
+height = 1 + \max(leftHeight, rightHeight)
+]
+
+---
+
+# 4. JavaScript Solution (Optimal)
+
+```javascript
+const diameterOfBinaryTree = (root) => {
+  let diameter = 0;
+
+  const dfs = (node) => {
+    if (!node) return 0;
+
+    const leftHeight = dfs(node.left);
+    const rightHeight = dfs(node.right);
+
+    // update diameter (edges count)
+    diameter = Math.max(diameter, leftHeight + rightHeight);
+
+    // return height of subtree
+    return 1 + Math.max(leftHeight, rightHeight);
+  };
+
+  dfs(root);
+  return diameter;
+};
+```
+
+---
+
+# 5. Complexity Analysis
+
+### Time Complexity
+
+- **O(n)**
+  Each node is visited exactly once.
+
+### Space Complexity
+
+- **O(h)** recursion stack
+  Where:
+- h = height of tree
+- Worst case: O(n) (skewed tree)
+- Best case: O(log n) (balanced tree)
+
+---
+
+# 6. Edge Cases
+
+### 1. Empty Tree
+
+```text
+null → diameter = 0
+```
+
+### 2. Single Node
+
+```text
+1 → diameter = 0
+```
+
+(No edges)
+
+### 3. Skewed Tree
+
+```text
+1
+ \
+  2
+   \
+    3
+```
+
+Diameter = 2
+
+---
+
+# 7. Common Mistakes
+
+### ❌ Mistake 1: Recomputing height separately
+
+Leads to O(n²) solution.
+
+### ❌ Mistake 2: Confusing nodes vs edges
+
+- edges = leftHeight + rightHeight
+- nodes = leftHeight + rightHeight + 1
+
+Be clear in interviews.
+
+### ❌ Mistake 3: Updating diameter incorrectly
+
+Only update using:
+
+```javascript
+leftHeight + rightHeight;
+```
+
+---
+
+# 8. Alternative Interpretation (Node-based diameter)
+
+If asked for **number of nodes in longest path**, modify:
+
+```javascript
+diameter = Math.max(diameter, leftHeight + rightHeight + 1);
+```
+
+and return:
+
+```javascript
+return 1 + Math.max(leftHeight, rightHeight);
+```
+
+---
+
+# 9. Interview Summary
+
+If asked this problem in an interview, your ideal answer:
+
+1. Brute force explanation (optional)
+2. Optimized DFS solution
+3. One-pass traversal idea
+4. Clearly define edges vs nodes
+
 ## Question 3. Check if a tree is balanced
 
 ## Question 4. Lowest common ancestor in a BST
